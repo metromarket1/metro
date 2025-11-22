@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>طلبات الموظفين - بنك الأردن</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            max-width: 480px;
+            margin: auto;
+        }
+
+        .card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #000;
+            color: #fff;
+            border: none;
+            margin-top: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2>طلبات الموظفين - بنك الأردن</h2>
+
+        <label>اسم الموظف</label>
+        <input type="text" placeholder="اكتب اسمك هنا" />
+
+        <label>رقم الهاتف</label>
+        <input type="tel" placeholder="059XXXXXXX" />
+
+        <label>القسم</label>
+        <input type="text" placeholder="اختياري" />
+
+        <label>اختيار الطلب</label>
+        <select>
+            <option>شاورما دجاج</option>
+            <option>تشيكن رانش</option>
+            <option>مترو بيف</option>
+            <option>كريسبي سبايسي</option>
+            <option>هاواي تشيكن</option>
+            <option>سلطة سيزر (بدون بصل)</option>
+            <option>سلطة مترو الخاصة</option>
+        </select>
+
+        <label>وقت التوصيل</label>
+        <select>
+            <option>10:00 صباحاً</option>
+            <option>12:00 ظهراً</option>
+        </select>
+
+        <label>ملاحظات</label>
+        <input type="text" placeholder="أي ملاحظات إضافية" />
+
+        <button onclick="sendToWhatsApp()">إرسال الطلب</button>
+    </div>
+
+    <script>
+        function sendToWhatsApp() {
+            const name = document.querySelector('input[placeholder="اكتب اسمك هنا"]').value || 'غير محدد';
+            const phone = document.querySelector('input[placeholder="059XXXXXXX"]').value || 'غير محدد';
+            const dept = document.querySelector('input[placeholder="اختياري"]').value || 'غير محدد';
+            const order = document.querySelectorAll('select')[0].value;
+            const time = document.querySelectorAll('select')[1].value;
+            const notes = document.querySelector('input[placeholder="أي ملاحظات إضافية"]').value || 'لا توجد';
+
+            const msg =
+                "طلب جديد من موظف بنك الأردن:" +
+                `%0Aالاسم: ${encodeURIComponent(name)}` +
+                `%0Aالهاتف: ${encodeURIComponent(phone)}` +
+                `%0Aالقسم: ${encodeURIComponent(dept)}` +
+                `%0Aالطلب: ${encodeURIComponent(order)}` +
+                `%0Aوقت التوصيل: ${encodeURIComponent(time)}` +
+                `%0Aملاحظات: ${encodeURIComponent(notes)}`;
+
+            window.location.href = `https://wa.me/972566000166?text=${msg}`;
+        }
+    </script>
+</body>
+
+</html>
