@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="metrologo.jpeg">
-    <title>طلبات الموظفين - بنك الأردن</title>
+    <title>طلبات الموظفين - Metro</title>
 
     <style>
         body {
@@ -353,6 +353,8 @@
                 `%0Aوقت التوصيل: ${encodeURIComponent(time)}` +
                 `%0Aإجمالي السعر: ${total} شيكل` +
                 `%0A${orderMsg}`;
+            window.location.href = `https://wa.me/972566000166?text=${msg}`;
+
 
         }
 
