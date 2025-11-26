@@ -4,120 +4,481 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="metrologo.jpeg">
     <title>طلبات الموظفين - بنك الأردن</title>
+
     <style>
         body {
             font-family: sans-serif;
-            background: #f5f5f5;
+            background: #f0f2f5;
             padding: 20px;
-            max-width: 480px;
+            max-width: 500px;
             margin: auto;
         }
 
         .card {
             background: #fff;
-            padding: 20px;
+            padding: 24px;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 26px;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .logo {
+            width: 150px;
+            border-radius: 12px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0 14px;
+            color: #222;
+        }
+
+        /* Slider */
+        .slider {
+            position: relative;
             border-radius: 16px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             margin-bottom: 20px;
         }
 
-        h2 {
-            margin-top: 0;
-            text-align: center;
-            color: #333;
+        .slides img {
+            width: 100%;
+            display: none;
+            object-fit: cover;
         }
 
+        .slides img.active {
+            display: block;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 32px;
+            text-align: center;
+        }
+
+        .slider-nav.prev {
+            right: 10px;
+        }
+
+        .slider-nav.next {
+            left: 10px;
+        }
+
+        .slider-dots {
+            text-align: center;
+            padding: 8px 0 4px;
+            background: #fff;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin: 0 3px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background: #0d6efd;
+        }
+
+        /* Form styling */
         label {
             display: block;
-            margin-top: 12px;
-            font-weight: bold;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
         }
 
         input,
         select {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             border: 1px solid #ccc;
-            margin-top: 6px;
+            background: #fafafa;
+            font-size: 15px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #000;
-            color: #fff;
-            border: none;
-            margin-top: 20px;
+        /* Order Blocks */
+        .order-item {
+            padding: 15px;
+            border: 1px solid #ddd;
             border-radius: 10px;
-            font-size: 16px;
+            background: #fafafa;
+            margin-top: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-title {
+            margin: 0;
+            color: #444;
+        }
+
+        .order-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .qty-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            background: #fff;
+        }
+
+        .order-select {
+            flex: 3;
+        }
+
+        .delete-order-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
             cursor: pointer;
         }
 
-        button:hover {
+        /* Add order button */
+        .add-order-btn {
+            background: #ff9800;
+            width: auto;
+            padding: 8px 14px;
+            font-size: 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Main submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #0d6efd;
+            color: #fff;
+            border: none;
+            margin-top: 22px;
+            border-radius: 12px;
+            font-size: 17px;
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: .3px;
+        }
+
+        .submit-btn:hover {
             opacity: 0.9;
         }
     </style>
 </head>
 
 <body>
+
     <div class="card">
-        <h2>طلبات الموظفين - بنك الأردن</h2>
+
+        <div class="logo-container">
+            <img src="metrologo.jpeg" class="logo" alt="Metro Logo">
+        </div>
+
+        <div class="section-title">قائمة الطعام</div>
+
+        <!-- Slider -->
+        <div class="slider">
+            <div class="slides">
+                <img src="menu1.jpeg" class="slide active">
+                <img src="menu2.jpeg" class="slide">
+            </div>
+
+            <button class="slider-nav prev" onclick="changeSlide(-1)">‹</button>
+            <button class="slider-nav next" onclick="changeSlide(1)">›</button>
+
+            <div class="slider-dots">
+                <span class="dot active" onclick="goToSlide(0)"></span>
+                <span class="dot" onclick="goToSlide(1)"></span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <label>اختر الشركة</label>
+        <select id="companySelect">
+            <option value="غير محدد" selected>اختياري</option>
+            <option value="الشركة أ">الشركة أ</option>
+            <option value="الشركة ب">الشركة ب</option>
+            <option value="الشركة ج">الشركة ج</option>
+        </select>
 
         <label>اسم الموظف</label>
-        <input type="text" placeholder="اكتب اسمك هنا" />
+        <input type="text" id="nameInput" placeholder="اكتب اسمك هنا">
 
         <label>رقم الهاتف</label>
-        <input type="tel" placeholder="059XXXXXXX" />
+        <input type="tel" id="phoneInput" placeholder="059XXXXXXX">
 
-        <label>القسم</label>
-        <input type="text" placeholder="اختياري" />
+        <!-- Orders -->
+        <div id="ordersContainer">
+            <div class="order-item">
+                <div class="order-header">
+                    <h3 class="order-title">الطلب رقم 1</h3>
+                </div>
 
-        <label>اختيار الطلب</label>
-        <select>
-            <option>شاورما دجاج</option>
-            <option>تشيكن رانش</option>
-            <option>مترو بيف</option>
-            <option>كريسبي سبايسي</option>
-            <option>هاواي تشيكن</option>
-            <option>سلطة سيزر (بدون بصل)</option>
-            <option>سلطة مترو الخاصة</option>
-        </select>
+                <label>اختيار الطلب</label>
+
+                <div class="order-row">
+                    <select class="orderSelect order-select">
+                        <option>شاورما دجاج</option>
+                        <option>تشيكن رانش</option>
+                        <option>مترو بيف</option>
+                        <option>كريسبي سبايسي</option>
+                        <option>هاواي تشيكن</option>
+                        <option>سلطة سيزر (بدون بصل)</option>
+                        <option>سلطة مترو الخاصة</option>
+                    </select>
+
+                    <input type="number" class="orderQty qty-input" min="1" value="1">
+                </div>
+
+                <label>إضافة ملاحظات على الطلب</label>
+                <input type="text" class="notesInput" placeholder="يوجد رسوم على الإضافات">
+            </div>
+        </div>
+
+        <button id="addOrderBtn" type="button" class="add-order-btn">إضافة طلب</button>
+        <div id="totalContainer" style="
+            margin-top:15px;
+            font-size:18px;
+            font-weight:bold;
+            color:#333;
+            ">
+            إجمالي السعر: 0 شيكل
+        </div>
 
         <label>وقت التوصيل</label>
-        <select>
-            <option>10:00 صباحاً</option>
-            <option>12:00 ظهراً</option>
-        </select>
+        <select id="timeSelect"></select>
 
-        <label>ملاحظات</label>
-        <input type="text" placeholder="أي ملاحظات إضافية" />
+        <button onclick="sendToWhatsApp()" class="submit-btn">إرسال الطلب</button>
 
-        <button onclick="sendToWhatsApp()">إرسال الطلب</button>
     </div>
 
     <script>
+        const mealPrices = {
+            "شاورما دجاج": 12,
+            "تشيكن رانش": 14,
+            "مترو بيف": 16,
+            "كريسبي سبايسي": 14,
+            "هاواي تشيكن": 15,
+            "سلطة سيزر (بدون بصل)": 10,
+            "سلطة مترو الخاصة": 12
+        };
+
+        function updateTotal() {
+            let total = 0;
+
+            const orders = document.querySelectorAll(".order-item");
+
+            orders.forEach(item => {
+                const meal = item.querySelector(".orderSelect").value;
+                const qty = parseInt(item.querySelector(".orderQty").value) || 0;
+                const price = mealPrices[meal] || 0;
+
+                total += price * qty;
+            });
+
+            document.getElementById("totalContainer").textContent =
+                `إجمالي السعر: ${total} شيكل`;
+
+            return total;
+        }
         function sendToWhatsApp() {
-            const name = document.querySelector('input[placeholder="اكتب اسمك هنا"]').value || 'غير محدد';
-            const phone = document.querySelector('input[placeholder="059XXXXXXX"]').value || 'غير محدد';
-            const dept = document.querySelector('input[placeholder="اختياري"]').value || 'غير محدد';
-            const order = document.querySelectorAll('select')[0].value;
-            const time = document.querySelectorAll('select')[1].value;
-            const notes = document.querySelector('input[placeholder="أي ملاحظات إضافية"]').value || 'لا توجد';
+            const total = updateTotal();
+            const name = document.getElementById("nameInput").value || 'غير محدد';
+            const phone = document.getElementById("phoneInput").value || 'غير محدد';
+            const dept = document.getElementById("companySelect").value;
+            const time = document.getElementById("timeSelect").value;
+
+            const orders = document.querySelectorAll(".order-item");
+            let orderMsg = "";
+
+            orders.forEach((item, index) => {
+                const order = item.querySelector(".orderSelect").value;
+                const qty = item.querySelector(".orderQty").value;
+                const notes = item.querySelector(".notesInput").value || "لا توجد";
+
+                orderMsg += `%0A--- الطلب رقم ${index + 1} ---` +
+                    `%0Aالطلب: ${encodeURIComponent(order)}` +
+                    `%0Aالعدد: ${encodeURIComponent(qty)}` +
+                    `%0Aملاحظات: ${encodeURIComponent(notes)}%0A`;
+            });
 
             const msg =
                 "طلب جديد من موظف بنك الأردن:" +
                 `%0Aالاسم: ${encodeURIComponent(name)}` +
                 `%0Aالهاتف: ${encodeURIComponent(phone)}` +
-                `%0Aالقسم: ${encodeURIComponent(dept)}` +
-                `%0Aالطلب: ${encodeURIComponent(order)}` +
+                `%0Aالشركة: ${encodeURIComponent(dept)}` +
                 `%0Aوقت التوصيل: ${encodeURIComponent(time)}` +
-                `%0Aملاحظات: ${encodeURIComponent(notes)}`;
+                `%0Aإجمالي السعر: ${total} شيكل` +
+                `%0A${orderMsg}`;
 
-            window.location.href = `https://wa.me/972566000166?text=${msg}`;
         }
+
+        document.getElementById("addOrderBtn").addEventListener("click", addNewOrder);
+
+        function addNewOrder() {
+            const container = document.getElementById("ordersContainer");
+
+            const newOrder = document.createElement("div");
+            newOrder.classList.add("order-item");
+
+            newOrder.innerHTML = `
+                <div class="order-header">
+                    <h3 class="order-title">الطلب رقم</h3>
+                    <button type="button" class="delete-order-btn">حذف الطلب</button>
+                </div>
+
+                <label>اختيار الطلب</label>
+
+                <div class="order-row">
+                    <select class="orderSelect order-select">
+                        <option>شاورما دجاج</option>
+                        <option>تشيكن رانش</option>
+                        <option>مترو بيف</option>
+                        <option>كريسبي سبايسي</option>
+                        <option>هاواي تشيكن</option>
+                        <option>سلطة سيزر (بدون بصل)</option>
+                        <option>سلطة مترو الخاصة</option>
+                    </select>
+
+                    <input type="number" class="orderQty qty-input" min="1" value="1">
+                </div>
+
+                <label>ملاحظات على الطلب</label>
+                <input type="text" class="notesInput" placeholder="أي ملاحظات إضافية">
+            `;
+
+            container.appendChild(newOrder);
+            updateOrderNumbers();
+            updateTotal();
+            newOrder.querySelector(".orderSelect").addEventListener("change", updateTotal);
+            newOrder.querySelector(".orderQty").addEventListener("input", updateTotal);
+            newOrder.querySelector(".delete-order-btn").addEventListener("click", () => {
+                newOrder.remove();
+                updateOrderNumbers();
+                updateTotal();
+            });
+
+        }
+
+        function updateOrderNumbers() {
+            const titles = document.querySelectorAll(".order-title");
+            titles.forEach((t, i) => {
+                t.textContent = `الطلب رقم ${i + 1}`;
+            });
+        }
+        const timeSelect = document.getElementById("timeSelect");
+        const companySelect = document.getElementById("companySelect");
+
+        // Delivery times per company
+        const deliveryTimes = {
+            "غير محدد": [],
+            "الشركة أ": ["10:00 صباحاً", "11:00 صباحاً"],
+            "الشركة ب": ["11:30 صباحاً", "12:30 ظهراً"],
+            "الشركة ج": ["1:00 ظهراً", "2:00 ظهراً"]
+        };
+
+        // Function to update delivery time options
+        function updateDeliveryTimes() {
+            const selectedCompany = companySelect.value;
+            const times = deliveryTimes[selectedCompany] || [];
+
+            // Clear previous options
+            timeSelect.innerHTML = "";
+
+            if (times.length === 0) {
+                timeSelect.innerHTML = `<option value="">اختر الشركة أولاً</option>`;
+                return;
+            }
+
+            times.forEach(t => {
+                const opt = document.createElement("option");
+                opt.textContent = t;
+                opt.value = t;
+                timeSelect.appendChild(opt);
+            });
+        }
+
+        // Update when company changes
+        companySelect.addEventListener("change", updateDeliveryTimes);
+
+        // Run once on page load
+        updateDeliveryTimes();
+        updateTotal();
+        let currentSlide = 0;
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+
+            if (index < 0) index = slides.length - 1;
+            if (index >= slides.length) index = 0;
+
+            slides.forEach((img, i) => {
+                img.classList.toggle('active', i === index);
+            });
+
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            currentSlide = index;
+        }
+
+        function changeSlide(step) {
+            showSlide(currentSlide + step);
+        }
+
+        function goToSlide(index) {
+            showSlide(index);
+        }
+
+        document.querySelector(".orderSelect").addEventListener("change", updateTotal);
+        document.querySelector(".orderQty").addEventListener("input", updateTotal);
     </script>
+
 </body>
 
 </html>
