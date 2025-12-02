@@ -254,31 +254,35 @@
         <div id="ordersContainer">
             <div class="order-item">
                 <div class="order-header">
-                    <h3 class="order-title">الطلب رقم 1</h3>
+                    <h3 class="order-title">الوجبة رقم 1</h3>
                 </div>
+                <label>اختيار الفئة</label>
+                <select class="categorySelect order-select">
+                    <option value="">اختر الفئة</option>
+                    <option value="sandwiches" selected>سندويشات</option>
+                    <option value="salads">سلطات</option>
+                    <option value="starters">مقبلات</option>
+                    <option value="drinks">مشروبات</option>
+                </select>
 
-                <label>اختيار الطلب</label>
+
+                <label>اختيار الوجبة</label>
 
                 <div class="order-row">
-                    <select class="orderSelect order-select">
-                        <option>شاورما دجاج</option>
-                        <option>تشيكن رانش</option>
-                        <option>مترو بيف</option>
-                        <option>كريسبي سبايسي</option>
-                        <option>هاواي تشيكن</option>
-                        <option>سلطة سيزر (بدون بصل)</option>
-                        <option>سلطة مترو الخاصة</option>
-                    </select>
+                    <select class="orderSelect order-select"></select>
 
                     <input type="number" class="orderQty qty-input" min="1" value="1">
                 </div>
 
-                <label>إضافة ملاحظات على الطلب</label>
-                <input type="text" class="notesInput" placeholder="يوجد رسوم على الإضافات">
+                <div class="notesWrapper">
+                    <label>ملاحظات على الوجبة</label>
+                    <input type="text" class="notesInput" placeholder="أي ملاحظات إضافية">
+                </div>
+
             </div>
         </div>
 
-        <button id="addOrderBtn" type="button" class="add-order-btn">إضافة طلب</button>
+        <button id="addOrderBtn" type="button" class="add-order-btn">إضافة وجبة</button>
         <div id="totalContainer" style="
             margin-top:15px;
             font-size:18px;
@@ -296,15 +300,59 @@
     </div>
 
     <script>
-        const mealPrices = {
-            "شاورما دجاج": 12,
-            "تشيكن رانش": 14,
-            "مترو بيف": 16,
-            "كريسبي سبايسي": 14,
-            "هاواي تشيكن": 15,
-            "سلطة سيزر (بدون بصل)": 10,
-            "سلطة مترو الخاصة": 12
+        const menuData = {
+            sandwiches: {
+                "نقانق و جبنة": 18,
+                "أفوكادو و بيض": 18,
+                "مترو مكس": 20,
+                "تونة": 20,
+                "حلومي": 24,
+                "دجاج كرسبي": 25,
+                "أفوكادو و دجاج": 27,
+                "دجاج وايت صوص": 27,
+                "شاورما دجاج": 25,
+                "برغر دجاج": 25,
+                "برغر لحمة": 30,
+                "لحمة كرانشي": 30,
+                "ساندويش كفتة": 30,
+                "سلمون مدخّن": 35
+            },
+            salads: {
+                "سلطة سيزر": 22,
+                "سلطة يونانية": 22,
+                "سلطة التفاح الأخضر": 22,
+                "وجبة صحية مع اريش": 25,
+                "سلطة معكرونة": 25,
+                "تبولة كينوا": 25,
+                "سلطة تونة وأفوكادو": 27,
+                "سلطة سوبر": 30
+            },
+            starters: {
+                "بطاطا سادة": 10,
+                "بطاطا ويدجز": 12,
+                "بطاطا مع تشيدر وهالبينو": 14,
+                "بطاطا كيرلي": 14,
+                "مكس بوكس": 18,
+                "بطاطا مع دجاج كريسبي": 25,
+                "أصابع كريسبي وصوصات": 30
+            },
+            drinks: {
+                "عصير برتقال": 12,
+                "عصير شمندر": 12,
+                "عصير أخضر": 12
+            }
         };
+
+
+        document.querySelectorAll(".categorySelect").forEach(select => {
+            select.addEventListener("change", e => {
+                const item = e.target.closest(".order-item");
+                updateMealOptions(item);
+                updateTotal();
+                toggleNotesVisibility(item);
+            });
+        });
+
 
         function updateTotal() {
             let total = 0;
@@ -313,9 +361,17 @@
 
             orders.forEach(item => {
                 const meal = item.querySelector(".orderSelect").value;
-                const qty = parseInt(item.querySelector(".orderQty").value) || 0;
-                const price = mealPrices[meal] || 0;
+                let price = 0;
 
+                // Find price in menuData
+                for (const category in menuData) {
+                    if (menuData[category][meal] !== undefined) {
+                        price = menuData[category][meal];
+                        break;
+                    }
+                }
+
+                const qty = parseInt(item.querySelector(".orderQty").value) || 0;
                 total += price * qty;
             });
 
@@ -324,6 +380,8 @@
 
             return total;
         }
+
+
         function sendToWhatsApp() {
             const total = updateTotal();
             const name = document.getElementById("nameInput").value || 'غير محدد';
@@ -346,7 +404,7 @@
             });
 
             const msg =
-                "طلب جديد من موظف بنك الأردن:" +
+                "وجبة جديدة: " +
                 `%0Aالاسم: ${encodeURIComponent(name)}` +
                 `%0Aالهاتف: ${encodeURIComponent(phone)}` +
                 `%0Aالشركة: ${encodeURIComponent(dept)}` +
@@ -367,48 +425,74 @@
             newOrder.classList.add("order-item");
 
             newOrder.innerHTML = `
-                <div class="order-header">
-                    <h3 class="order-title">الطلب رقم</h3>
-                    <button type="button" class="delete-order-btn">حذف الطلب</button>
-                </div>
+        <div class="order-header">
+            <h3 class="order-title">الوجبة رقم</h3>
+            <button type="button" class="delete-order-btn">حذف الطلب</button>
+        </div>
 
-                <label>اختيار الطلب</label>
+        <label>اختيار الفئة</label>
+        <select class="categorySelect order-select">
+            <option value="sandwiches" selected>سندويشات</option>
+            <option value="salads">سلطات</option>
+            <option value="starters">مقبلات</option>
+            <option value="drinks">مشروبات</option>
+        </select>
 
-                <div class="order-row">
-                    <select class="orderSelect order-select">
-                        <option>شاورما دجاج</option>
-                        <option>تشيكن رانش</option>
-                        <option>مترو بيف</option>
-                        <option>كريسبي سبايسي</option>
-                        <option>هاواي تشيكن</option>
-                        <option>سلطة سيزر (بدون بصل)</option>
-                        <option>سلطة مترو الخاصة</option>
-                    </select>
+        <label>اختيار الوجبة</label>
 
-                    <input type="number" class="orderQty qty-input" min="1" value="1">
-                </div>
+        <div class="order-row">
+            <select class="orderSelect order-select"></select>
+            <input type="number" class="orderQty qty-input" min="1" value="1">
+        </div>
 
-                <label>ملاحظات على الطلب</label>
-                <input type="text" class="notesInput" placeholder="أي ملاحظات إضافية">
-            `;
+       <div class="notesWrapper">
+        <label>ملاحظات على الوجبة</label>
+        <input type="text" class="notesInput" placeholder="أي ملاحظات إضافية">
+        </div>
+
+    `;
 
             container.appendChild(newOrder);
-            updateOrderNumbers();
-            updateTotal();
+
+            // Load default category meals (sandwiches)
+            updateMealOptions(newOrder);
+
+            // Attach listeners
+            newOrder.querySelector(".categorySelect").addEventListener("change", () => {
+                updateMealOptions(newOrder);
+                updateTotal();
+                toggleNotesVisibility(newOrder);
+            });
+
             newOrder.querySelector(".orderSelect").addEventListener("change", updateTotal);
             newOrder.querySelector(".orderQty").addEventListener("input", updateTotal);
+
             newOrder.querySelector(".delete-order-btn").addEventListener("click", () => {
                 newOrder.remove();
                 updateOrderNumbers();
                 updateTotal();
             });
 
+            updateOrderNumbers();
+            updateTotal();
         }
+
+        function toggleNotesVisibility(orderItem) {
+            const category = orderItem.querySelector(".categorySelect").value;
+            const notesWrapper = orderItem.querySelector(".notesWrapper");
+
+            if (category === "drinks") {
+                notesWrapper.style.display = "none";
+            } else {
+                notesWrapper.style.display = "block";
+            }
+        }
+
 
         function updateOrderNumbers() {
             const titles = document.querySelectorAll(".order-title");
             titles.forEach((t, i) => {
-                t.textContent = `الطلب رقم ${i + 1}`;
+                t.textContent = `الوجبة رقم ${i + 1}`;
             });
         }
         const timeSelect = document.getElementById("timeSelect");
@@ -445,10 +529,34 @@
 
         // Update when company changes
         companySelect.addEventListener("change", updateDeliveryTimes);
+        function updateMealOptions(orderItem) {
+            const category = orderItem.querySelector(".categorySelect").value;
+            const mealSelect = orderItem.querySelector(".orderSelect");
+
+            mealSelect.innerHTML = "";  // clear old options
+
+            if (!category || !menuData[category]) {
+                mealSelect.innerHTML = `<option value="">اختر الفئة أولاً</option>`;
+                return;
+            }
+
+            for (const meal in menuData[category]) {
+                const opt = document.createElement("option");
+                opt.value = meal;
+                opt.textContent = meal;
+                mealSelect.appendChild(opt);
+            }
+        }
 
         // Run once on page load
         updateDeliveryTimes();
         updateTotal();
+        window.addEventListener("load", () => {
+            const firstOrder = document.querySelector(".order-item");
+            updateMealOptions(firstOrder);
+            toggleNotesVisibility(firstOrder);
+        });
+
         let currentSlide = 0;
 
         function showSlide(index) {
