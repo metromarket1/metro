@@ -17,6 +17,37 @@
             text-align: center;
         }
 
+        .login-box {
+            max-width: 300px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .login-input {
+            width: 90%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            background: #0d6efd;
+            width: 100%;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+
         .order-card {
             background: #fff;
             padding: 18px;
@@ -46,14 +77,32 @@
 
 <body>
 
-    <h1>Saved Orders</h1>
+    <div id="loginSection" class="login-box">
+        <h2>Admin Login</h2>
+        <p>Enter PIN to view orders</p>
+        <input id="pinInput" class="login-input" type="password" placeholder="PIN">
+        <button class="login-btn" onclick="checkPin()">Login</button>
+        <p id="errorMsg" style="color:red; display:none;">Incorrect PIN</p>
+    </div>
 
-    <div id="ordersContainer">Loading...</div>
+    <div id="ordersSection" style="display:none;">
+        <h1>Saved Orders</h1>
+        <div id="ordersContainer">Loading...</div>
+    </div>
 
     <!-- Firebase -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+        import {
+            getFirestore,
+            collection,
+            getDocs,
+            doc,
+            getDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-3r76WFp30pm4if_7JiuYrxSx64mhmgs",
@@ -70,50 +119,72 @@
 
         const ordersContainer = document.getElementById("ordersContainer");
 
-        async function loadOrders() {
-            const querySnapshot = await getDocs(collection(db, "orders"));
+        // === CHECK PIN ===
+        window.checkPin = async function () {
+            const userPin = document.getElementById("pinInput").value;
 
-            if (querySnapshot.empty) {
-                ordersContainer.innerHTML = "<p>No orders found.</p>";
-                return;
+            try {
+                const pinDoc = await getDoc(doc(db, "Admin", "access"));
+
+                if (!pinDoc.exists()) {
+                    alert("PIN document missing");
+                    return;
+                }
+                
+                const realPin = pinDoc.data().pin;
+
+                if (userPin === realPin) {
+                    document.getElementById("loginSection").style.display = "none";
+                    document.getElementById("ordersSection").style.display = "block";
+                    loadOrders();
+                } else {
+                    document.getElementById("errorMsg").style.display = "block";
+                }
+
+            } catch (err) {
+                console.error(err);
+                alert("Error connecting to database");
             }
+        };
+
+        // === LOAD ORDERS ===
+        async function loadOrders() {
+            const snap = await getDocs(collection(db, "orders"));
 
             ordersContainer.innerHTML = "";
 
-            querySnapshot.forEach(doc => {
+            snap.forEach(doc => {
                 const data = doc.data();
 
                 const card = document.createElement("div");
                 card.className = "order-card";
 
                 card.innerHTML = `
-                    <div class="order-title">Order from ${data.name}</div>
+                <div class="order-title">Order from ${data.name}</div>
 
-                    <p><span class="label">Phone:</span> ${data.phone}</p>
-                    <p><span class="label">Company:</span> ${data.company}</p>
-                    <p><span class="label">Delivery Time:</span> ${data.time}</p>
-                    <p><span class="label">Total:</span> ${data.total} ₪</p>
-                    <p><span class="label">Date:</span> ${data.createdAt}</p>
+                <p><span class="label">Phone:</span> ${data.phone}</p>
+                <p><span class="label">Company:</span> ${data.company}</p>
+                <p><span class="label">Delivery Time:</span> ${data.time}</p>
+                <p><span class="label">Total:</span> ${data.total} ₪</p>
+                <p><span class="label">Date:</span> ${data.createdAt}</p>
 
-                    <div class="label">Meals:</div>
-                `;
+                <div class="label">Meals:</div>
+            `;
 
                 data.orders.forEach(o => {
                     const item = document.createElement("div");
                     item.className = "order-item";
                     item.innerHTML = `
-                        <div><b>Meal:</b> ${o.order}</div>
-                        <div><b>Qty:</b> ${o.qty}</div>
-                        <div><b>Notes:</b> ${o.notes}</div>
-                    `;
+                    <div><b>Meal:</b> ${o.order}</div>
+                    <div><b>Qty:</b> ${o.qty}</div>
+                    <div><b>Notes:</b> ${o.notes}</div>
+                `;
                     card.appendChild(item);
                 });
 
                 ordersContainer.appendChild(card);
             });
         }
-
-        loadOrders();
     </script>
 
 </body>
