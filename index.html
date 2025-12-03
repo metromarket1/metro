@@ -42,68 +42,19 @@
             color: #222;
         }
 
-        /* Slider */
-        .slider {
-            position: relative;
+        .menu-image {
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             margin-bottom: 20px;
         }
 
-        .slides img {
+        .menu-img {
             width: 100%;
-            display: none;
+            display: block;
             object-fit: cover;
         }
 
-        .slides img.active {
-            display: block;
-        }
-
-        .slider-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: rgba(0, 0, 0, 0.45);
-            color: #fff;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            line-height: 32px;
-            text-align: center;
-        }
-
-        .slider-nav.prev {
-            right: 10px;
-        }
-
-        .slider-nav.next {
-            left: 10px;
-        }
-
-        .slider-dots {
-            text-align: center;
-            padding: 8px 0 4px;
-            background: #fff;
-        }
-
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            margin: 0 3px;
-            border-radius: 50%;
-            background: #ccc;
-            cursor: pointer;
-        }
-
-        .dot.active {
-            background: #0d6efd;
-        }
 
         /* Form styling */
         label {
@@ -219,21 +170,11 @@
 
         <div class="section-title">قائمة الطعام</div>
 
-        <!-- Slider -->
-        <div class="slider">
-            <div class="slides">
-                <img src="menu1.jpeg" class="slide active">
-                <img src="menu2.jpeg" class="slide">
-            </div>
-
-            <button class="slider-nav prev" onclick="changeSlide(-1)">‹</button>
-            <button class="slider-nav next" onclick="changeSlide(1)">›</button>
-
-            <div class="slider-dots">
-                <span class="dot active" onclick="goToSlide(0)"></span>
-                <span class="dot" onclick="goToSlide(1)"></span>
-            </div>
+        <!-- Menu Image -->
+        <div class="menu-image">
+            <img src="black.jpg" alt="Menu" class="menu-img">
         </div>
+
 
         <!-- Form -->
         <label>اختر الشركة</label>
@@ -298,6 +239,29 @@
         <button onclick="sendToWhatsApp()" class="submit-btn">إرسال الطلب</button>
 
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-3r76WFp30pm4if_7JiuYrxSx64mhmgs",
+            authDomain: "metromarket-e3ac1.firebaseapp.com",
+            projectId: "metromarket-e3ac1",
+            storageBucket: "metromarket-e3ac1.firebasestorage.app",
+            messagingSenderId: "971425298628",
+            appId: "1:971425298628:web:99088387a795469c05b191",
+            measurementId: "G-WLFZ4E8KNK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.saveOrder = async function (orderData) {
+            console.log("Saving to Firebase:", orderData);
+            await addDoc(collection(db, "orders"), orderData);
+        };
+    </script>
 
     <script>
         const menuData = {
@@ -382,6 +346,11 @@
         }
 
 
+        async function saveOrderToFirebase(orderData) {
+            console.log("Saving order to Firebase:", orderData);
+            await saveOrder(orderData);
+        }
+
         function sendToWhatsApp() {
             const total = updateTotal();
             const name = document.getElementById("nameInput").value || 'غير محدد';
@@ -391,6 +360,7 @@
 
             const orders = document.querySelectorAll(".order-item");
             let orderMsg = "";
+            let orderList = [];
 
             orders.forEach((item, index) => {
                 const order = item.querySelector(".orderSelect").value;
@@ -401,8 +371,28 @@
                     `%0Aالطلب: ${encodeURIComponent(order)}` +
                     `%0Aالعدد: ${encodeURIComponent(qty)}` +
                     `%0Aملاحظات: ${encodeURIComponent(notes)}%0A`;
+
+                orderList.push({
+                    order: order,
+                    qty: qty,
+                    notes: notes
+                });
             });
 
+            // Save to Firebase
+
+            saveOrder({
+                name: name,
+                phone: phone,
+                company: dept,
+                time: time,
+                total: total,
+                orders: orderList,
+                createdAt: new Date().toISOString()
+            });
+
+
+            // Redirect to WhatsApp
             const msg =
                 "وجبة جديدة: " +
                 `%0Aالاسم: ${encodeURIComponent(name)}` +
@@ -411,10 +401,10 @@
                 `%0Aوقت التوصيل: ${encodeURIComponent(time)}` +
                 `%0Aإجمالي السعر: ${total} شيكل` +
                 `%0A${orderMsg}`;
+
             window.location.href = `https://wa.me/972566000166?text=${msg}`;
-
-
         }
+
 
         document.getElementById("addOrderBtn").addEventListener("click", addNewOrder);
 
@@ -554,6 +544,7 @@
         window.addEventListener("load", () => {
             const firstOrder = document.querySelector(".order-item");
             updateMealOptions(firstOrder);
+            updateTotal();
             toggleNotesVisibility(firstOrder);
         });
 

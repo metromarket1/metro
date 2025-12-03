@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Orders Dashboard</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .order-card {
+            background: #fff;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .order-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .order-item {
+            background: #fafafa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Saved Orders</h1>
+
+    <div id="ordersContainer">Loading...</div>
+
+    <!-- Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-3r76WFp30pm4if_7JiuYrxSx64mhmgs",
+            authDomain: "metromarket-e3ac1.firebaseapp.com",
+            projectId: "metromarket-e3ac1",
+            storageBucket: "metromarket-e3ac1.firebasestorage.app",
+            messagingSenderId: "971425298628",
+            appId: "1:971425298628:web:99088387a795469c05b191",
+            measurementId: "G-WLFZ4E8KNK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const ordersContainer = document.getElementById("ordersContainer");
+
+        async function loadOrders() {
+            const querySnapshot = await getDocs(collection(db, "orders"));
+
+            if (querySnapshot.empty) {
+                ordersContainer.innerHTML = "<p>No orders found.</p>";
+                return;
+            }
+
+            ordersContainer.innerHTML = "";
+
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+
+                const card = document.createElement("div");
+                card.className = "order-card";
+
+                card.innerHTML = `
+                    <div class="order-title">Order from ${data.name}</div>
+
+                    <p><span class="label">Phone:</span> ${data.phone}</p>
+                    <p><span class="label">Company:</span> ${data.company}</p>
+                    <p><span class="label">Delivery Time:</span> ${data.time}</p>
+                    <p><span class="label">Total:</span> ${data.total} ₪</p>
+                    <p><span class="label">Date:</span> ${data.createdAt}</p>
+
+                    <div class="label">Meals:</div>
+                `;
+
+                data.orders.forEach(o => {
+                    const item = document.createElement("div");
+                    item.className = "order-item";
+                    item.innerHTML = `
+                        <div><b>Meal:</b> ${o.order}</div>
+                        <div><b>Qty:</b> ${o.qty}</div>
+                        <div><b>Notes:</b> ${o.notes}</div>
+                    `;
+                    card.appendChild(item);
+                });
+
+                ordersContainer.appendChild(card);
+            });
+        }
+
+        loadOrders();
+    </script>
+
+</body>
+
+</html>
